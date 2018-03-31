@@ -22,7 +22,8 @@ open Shared
 
 type Report =
     { Location : LocationResponse
-      Crimes : CrimeResponse array }
+      Crimes : CrimeResponse array
+      Weather : WeatherResponse }
 
 type ServerState = Idle | Loading | ServerError of string
 
@@ -49,13 +50,12 @@ let init () =
 
 let getResponse postcode = promise {
     let! location = Fetch.fetchAs<LocationResponse> (sprintf "/api/distance/%s" postcode) []
-    let! crimes = Fetch.tryFetchAs<CrimeResponse array> (sprintf "api/crime/%s" postcode) [] 
-                  |> Promise.map (Result.defaultValue [||])
-    
+    let! crimes = Fetch.tryFetchAs<CrimeResponse array> (sprintf "api/crime/%s" postcode) [] |> Promise.map (Result.defaultValue [||])
+    let! weather = Fetch.fetchAs<WeatherResponse> (sprintf "/api/weather/%s" postcode) []
     (* Task 4.3 WEATHER: Fetch the weather from the API endpoint you created.
        Then, save its value into the Report below. You'll need to add a new
        field to the Report type first, though! *)
-    return { Location = location; Crimes = crimes } }
+    return { Location = location; Crimes = crimes; Weather = weather } }
  
 /// The update function knows how to update the model given a message.
 let update msg model =
@@ -129,9 +129,7 @@ module ViewParts =
                         ]
                         Level.title [ ] [
                             Heading.h3 [ Heading.Is4; Heading.Props [ Style [ Width "100%" ] ] ] [
-                                (* Task 4.4 WEATHER: Get the temperature from the given weather report
-                                   and display it here instead of an empty string. *)
-                                str ""
+                                str <| string weatherReport.AverageTemperature
                             ]
                         ]
                     ]
@@ -200,6 +198,7 @@ let view model dispatch =
                             (* Task 4.5 WEATHER: Generate the view code for the weather tile
                                using the weatherTile function, supplying the weather report
                                from the model, and include it here as part of the list *)
+                            weatherTile model.Weather
                         ]
                         Tile.parent [ Tile.Size Tile.Is8 ] [
                             crimeTile model.Crimes
