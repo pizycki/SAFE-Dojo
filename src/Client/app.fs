@@ -74,7 +74,7 @@ let update msg model =
             Postcode = p
             (* Task 3.1 Validation. Use the Validation.validatePostcode function to implement client-side form validation.
                Note that the validation is the same shared code that runs on the server! *)
-            ValidationError = None }, Cmd.none
+            ValidationError = if p = "" || Validation.validatePostcode p then None else Some "Invalid Postcode"  }, Cmd.none  
     | _, ErrorMsg e -> { model with ServerState = ServerError e.Message }, Cmd.none
 
 [<AutoOpen>]
