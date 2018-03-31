@@ -6,3 +6,5 @@ paket-files/
 node_modules/
 src/Client/public/
 yarn\.lock
+_ReSharper.Caches/
+.vs/
